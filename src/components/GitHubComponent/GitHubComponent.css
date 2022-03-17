@@ -1,0 +1,19 @@
+.card {
+  border-radius: 0 !important;
+}
+
+.title {
+  position: relative;
+  margin-right: 24px;
+}
+
+.title .text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 40px;
+}
+
+.title .icon {
+  font-size: 16px;
+}
