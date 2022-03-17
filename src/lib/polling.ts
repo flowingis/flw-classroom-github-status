@@ -1,11 +1,8 @@
+import { Observable, timer } from "rxjs";
+
 export function polling(
   interval: number,
-  fn: () => void,
   startImmediately: boolean
-): () => void {
-  if (startImmediately) fn();
-  const id = setInterval(fn, interval);
-  return () => {
-    clearInterval(id);
-  };
+): Observable<number> {
+  return timer(startImmediately ? 0 : interval, interval);
 }

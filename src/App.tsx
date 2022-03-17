@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { catchError, map, mergeMap, tap } from 'rxjs'
 import './App.css'
 import { GitHubComponent } from './components'
 import { getComponentStatus } from './lib'
@@ -10,20 +11,21 @@ function App() {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    const unsubscribe = polling(3000, () => {
-      getComponentStatus(
-        results => {
-          const sortedComponents = results.filter(({ description }) => description).sort((a, b) => a.position - b.position)
-          setComponents(sortedComponents)
-        },
-        e => {
-          setError(e.message || 'Something went wrong')
-        }
-      )
-    }, false)
+    const unsubscribe = polling(3000, false).pipe(
+      mergeMap(() => getComponentStatus().pipe(
+        map(results => results.filter(({ description }) => description).sort((a, b) => a.position - b.position)),
+        tap(setComponents),
+      )),
+      catchError(e => {
+        setError(e.message || 'Something went wrong');
+        return [];
+      }),
+    ).subscribe({
+      next: setComponents,
+    })
 
     return () => {
-      unsubscribe();
+      unsubscribe.unsubscribe();
     }
   }, [])
 
