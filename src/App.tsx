@@ -10,16 +10,19 @@ function App() {
   const [error, setError] = useState<string>()
 
   useEffect(() => {
-    const unsubscribe = polling(3000, () => {
-      getComponentStatus(
-        results => {
-          const sortedComponents = results.filter(({ description }) => description).sort((a, b) => a.position - b.position)
-          setComponents(sortedComponents)
-        },
-        e => {
-          setError(e.message || 'Something went wrong')
+    const unsubscribe = polling(3000, async () => {
+      try {
+        const results = await getComponentStatus()
+        const sortedComponents = results.filter(({ description }) => description).sort((a, b) => a.position - b.position)
+        setComponents(sortedComponents)
+      } catch (e) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+
+          setError('Something went wrong')
         }
-      )
+      }
     }, false)
 
     return () => {
